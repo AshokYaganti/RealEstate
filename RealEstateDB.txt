@@ -1,0 +1,476 @@
+ 
+developertest2020@gmail.com
+test@1234
+
+
+
+workstation id=RealEstateDB.mssql.somee.com;packet size=4096;user id=fahad123_SQLLogin_1;pwd=wejvfwyzjm;data source=RealEstateDB.mssql.somee.com;persist security info=False;initial catalog=RealEstateDB
+..................................................................................................................................................
+
+create table registrations
+(fname varchar(50),
+lname varchar(50),
+username varchar(50),
+password varchar(20),
+email varchar(50),
+role varchar(50),
+company varchar(50),
+address varchar(100),
+state varchar(20),
+city varchar(30),
+zip varchar(10),
+phone varchar(20),
+created_date datetime)
+
+----------------------------------------------------------------------------------------------------------------------------------------------------1
+
+create  procedure sp_registrations
+(@fname varchar(50),
+@lname varchar(50),
+@username varchar(50),
+@password varchar(20),
+@email varchar(50),
+@role varchar(50),
+@company varchar(50),
+@address varchar(100),
+@state varchar(20),
+@city varchar(30),
+@zip varchar(10),
+@phone varchar(20))
+as
+begin
+insert into registrations values(@fname,@lname,@username,@password,@email,@role,@company,@address,@state,@city,@zip,@phone,GETDATE())
+end
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------2
+
+create procedure sp_username
+as
+begin
+select username from registrations
+end
+
+------------------------------------------------------------------------------------------------------------------------------------------------------3
+create table administration
+(username varchar(20),
+password varchar (20),
+fname varchar(20),
+lname varchar(20),
+role varchar(20),
+created_at varchar(20),
+email varchar(50))
+
+------------------------------------------------------------------------------------------------------------------------------------------------------4
+
+create procedure sp_logindetails
+(@username varchar(50))
+ as
+ begin 
+   Declare @admincount int
+   Declare @regcount int
+     select @admincount=COUNT(*) from administration where username=@username
+     select @regcount= COUNT(*) from registrations where username=@username
+       if @admincount>0
+		begin 
+		  select username as username,password as password,role as role,fname as fname,lname as lname 
+		   from  administration 
+		    where username=@username;
+		 end
+		 else if @regcount>0
+		 begin
+		   select username as username,password as password,role as role,fname as fname,lname as lname 
+		   from   registrations 
+		   where  username=@username;
+		 end		
+end
+
+------------------------------------------------------------------------------------------------------------------------------------------------------5
+
+
+insert into administration values('admin123','admin123','Fawaz','Fahad','a',GETDATE(),'developertest2020@gmail.com');
+
+------------------------------------------------------------------------------------------------------------------------------------------------------6
+
+create table userimage
+(id varchar(20),
+photo image,
+date1 datetime)
+
+------------------------------------------------------------------------------------------------------------------------------------------------------7
+
+
+create procedure sp_userimage
+(@id varchar(20),
+@photo image,
+@date1 datetime)
+as 
+begin
+insert into userimage values(@id,@photo,@date1)
+delete userimage where id=@id and date1<@date1
+end
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------8
+
+create table buildingrequests
+(bid int primary key identity(10000,1),
+username varchar(50),
+bname varchar(50),
+bsize varchar(20),
+btype varchar(50),
+bcost varchar(50),
+rooms varchar(20),
+roomcost varchar(20),
+baddress nvarchar(max),
+city varchar(30),
+state varchar(20),
+zip varchar(10),
+created_date datetime,
+status varchar(20))
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------9
+
+create procedure sp_buildingrequest
+(@username varchar(50),
+@bname varchar(50),
+@bsize varchar(20),
+@btype varchar(50),
+@bcost varchar(50),
+@rooms varchar(20),
+@roomcost varchar(20),
+@baddress nvarchar(max),
+@state varchar(20),
+@city varchar(30),
+@zip varchar(10),
+@status varchar(20),
+@bid int output)
+as
+begin
+insert into buildingrequests values(@username,@bname,@bsize,@btype,@bcost,@rooms,@roomcost,@baddress,@city,@state,@zip,GETDATE(),@status);
+SET @bid=SCOPE_IDENTITY()
+RETURN @bid
+end
+
+----------------------------------------------------------------------------------------------------------------------------------------------------10
+
+create table bimage
+(bid int,
+photo image)
+
+----------------------------------------------------------------------------------------------------------------------------------------------------11
+
+create procedure sp_buildingimage
+(@bid int,
+@photo image)
+as
+begin
+insert into bimage values(@bid,@photo)
+end
+
+----------------------------------------------------------------------------------------------------------------------------------------------------12
+
+create procedure sp_deletebuilding
+(@bid varchar(20))
+as
+begin
+delete buildingrequests where bid=@bid
+delete bimage where bid=@bid
+end
+
+.....................................................................................................................................................13
+
+create procedure sp_updatebuildingrequest
+(@bid varchar(50),
+@bname varchar(50),
+@bcost varchar(50),
+@rooms varchar(20),
+@roomcost varchar(20),
+@baddress nvarchar(max),
+@city varchar(30),
+@state varchar(20),
+@zip varchar(10))
+as
+begin
+update buildingrequests 
+  set bname=@bname,
+      bcost=@bcost,
+      rooms=@rooms,
+      roomcost=@roomcost,
+      baddress=@baddress,
+      city=@city,
+      state=@state,
+      zip=@zip
+  where bid=@bid
+end
+
+.....................................................................................................................................................14
+
+create procedure sp_approvebuilding
+(@bid varchar(20))
+as
+begin
+update buildingrequests
+  set status='APPROVED'
+  where bid=@bid
+ end
+ 
+....................................................................................................................................................15
+
+ create procedure sp_rejectbuilding
+(@bid varchar(20))
+as
+begin
+update buildingrequests
+  set status='REJECTED'
+  where bid=@bid
+ end
+ 
+...................................................................................................................................................16
+
+ create procedure sp_getallusernames
+ as
+ begin
+ select username from registrations
+ UNION
+ select username from administration
+ end
+ 
+...................................................................................................................................................17
+
+ create procedure sp_addAdministrator
+ (@fname varchar(20),
+ @lname varchar(20),
+ @username varchar(20),
+ @password varchar(20),
+ @email varchar(50))
+ as
+ begin
+ insert into administration values(@username,@password,@fname,@lname,'a',GETDATE(),@email)
+ end
+ 
+..................................................................................................................................................18 
+  
+ create procedure sp_updateadministrator
+ (@fname varchar(20),
+ @lname varchar(20),
+ @username varchar(20),
+ @password varchar(20),
+ @email varchar(50))
+ as
+ begin
+ update administration
+   set username=@username,
+       fname=@fname,
+       lname=@lname,
+       email=@email
+    where username=@username
+   end
+  
+...................................................................................................................................................19
+ 
+   create procedure sp_deleteadmin
+   (@username varchar(20))
+   as
+   begin
+   delete administration where username=@username
+   end
+
+....................................................................................................................................................20
+
+create table loginlog
+(username varchar(50),
+ fname varchar(20),
+ lname varchar(30),
+ role varchar(10),
+ log  datetime)
+
+....................................................................................................................................................21
+ 
+ create procedure sp_loginlog
+(@username varchar(50),
+ @fname varchar(20),
+ @lname varchar(30),
+ @role varchar(10))
+ as
+ begin
+ insert into loginlog values(@username,@fname,@lname,@role,GETDATE())
+ end
+
+....................................................................................................................................................22
+
+create procedure sp_adminbuldingrequests
+as
+begin
+select b.*,r.fname,r.lname,r.company from buildingrequests b, registrations r
+where b.username=r.username
+end
+
+.....................................................................................................................................................23
+
+create table cashbox
+(username varchar(20),
+ amount float,
+ tdate datetime)
+ 
+......................................................................................................................................................24
+
+create procedure sp_CashBox
+(@username varchar(20),
+@amount float,
+@tdate datetime)
+as
+begin
+insert into cashbox values(@username,@amount,@tdate)
+end
+
+.....................................................................................................................................................25
+
+create procedure sp_CashBoxAmount
+(@username varchar(20))
+as
+begin
+select SUM(amount) as tamount from cashbox where username=@username
+end
+
+.....................................................................................................................................................26
+
+alter procedure sp_buildingsearchdetails
+(@item1 varchar(20),
+ @item2 varchar(20))
+as
+begin
+  if(@item1='category')      
+       select b.*,r.fname,r.lname,r.company from buildingrequests b, registrations r
+         where b.username=r.username and b.btype=@item2 and b.status='APPROVED'
+  else if(@item1='state')
+       select b.*,r.fname,r.lname,r.company from buildingrequests b, registrations r
+         where b.username=r.username and b.state=@item2 and b.status='APPROVED'
+   else 
+       select b.*,r.fname,r.lname,r.company from buildingrequests b, registrations r
+         where b.username=r.username and b.city=@item2 and b.status='APPROVED'
+ end 
+ 
+..................................................................................................................................................27
+ 
+ create procedure sp_buildingAlldetails
+ as
+ begin
+       select b.*,r.fname,r.lname,r.company from buildingrequests b, registrations r
+         where b.username=r.username and b.status='APPROVED'
+ end 
+ 
+ .................................................................................................................................................28
+
+create table propertyaction
+(bid varchar(20),
+bowner varchar(20),
+customer varchar(20),
+cost float,
+fromdate varchar(50),
+todate  varchar(50),
+status varchar(10))
+  
+..................................................................................................................................................29
+
+create procedure sp_propertyaction
+(@bid varchar(20),
+@bowner varchar(20),
+@customer varchar(20),
+@cost float,
+@fromdate varchar(50),
+@todate  varchar(50),
+@type varchar(10))
+as 
+begin    
+  if @type='sale'
+   begin
+    insert into propertyaction values(@bid,@bowner,@customer,@cost,@fromdate,@todate,'Y');
+    update buildingrequests 
+      set status='CLOSED'
+        where bid=@bid;
+     insert into cashbox values(@customer,-@cost, GETDATE());
+     end
+     else if @type='rental'
+      begin
+       insert into propertyaction values(@bid,@bowner,@customer,@cost,@fromdate,@todate,'Y');
+       update buildingrequests 
+         set status='BOOKED'
+          where bid=@bid;
+       insert into cashbox values(@customer,-@cost,GETDATE());
+       end
+end
+
+.................................................................................................................................................30
+
+
+ create procedure sp_customerproperydetails
+ (@customer varchar(50))
+ as
+ begin
+       select p.bid,r.fname,r.lname,r.company,b.bname,b.bsize,b.btype,p.cost, p.fromdate,p.todate
+        from buildingrequests b, registrations r, propertyaction p
+         where b.username=r.username 
+         and (b.status='CLOSED' or b.status='BOOKED')
+         and b.bid=p.bid
+         and p.customer=@customer
+           
+ end 
+ 
+------------------------------------------------------------------------------------------------------------------------------------------------31
+ 
+ create procedure sp_agentcreditdetails
+ (@owner varchar(50))
+ as
+ begin
+       select p.bid,r.fname,r.lname,b.bname,b.btype,p.cost,p.fromdate,p.todate
+        from buildingrequests b, registrations r, propertyaction p
+         where p.customer=r.username         
+         and b.bid=p.bid
+         and p.bowner=@owner
+           
+ end
+
+------------------------------------------------------------------------------------------------------------------------------------------------- 32
+
+create procedure sp_totalamount
+(@owner varchar(50))
+ as
+ begin
+ select SUM(cost) from propertyaction where bowner=@owner
+ end
+
+--------------------------------------------------------------------------------------------------------------------------------------------------- 33
+
+ create procedure sp_propertypdf
+ (@bid varchar(20),
+  @customer varchar(50))
+ as
+ begin
+       select p.bid,r.fname,r.lname,r.company,b.bname,b.bsize,b.btype,b.baddress,b.city,b.state,b.zip,p.cost, p.fromdate,p.todate
+        from buildingrequests b, registrations r, propertyaction p
+         where b.username=r.username          
+         and b.bid=p.bid
+         and p.customer=@customer
+         and p.bid=@bid
+           
+ end 
+
+--------------------------------------------------------------------------------------------------------------------------------------------------- 34
+
+create procedure sp_updatebuildingstatus
+as
+begin
+update buildingrequests
+   set status='APPROVED'
+       where bid in (select bid from propertyaction
+                     where todate<>'N/A'
+                     and todate<GETDATE()
+                     and status='Y')
+                     
+ update propertyaction
+   set status='N'
+       where todate<>'N/A'
+       and todate<GETDATE()
+       and status='Y'
+ end
+
+---------------------------------------------------------------------------------------------------------------------------------------------------35
